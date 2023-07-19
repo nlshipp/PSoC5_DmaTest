@@ -1,14 +1,14 @@
 [*]
 [*] GTKWave Analyzer v3.3.100 (w)1999-2019 BSI
-[*] Tue Jul 18 04:57:42 2023
+[*] Wed Jul 19 03:06:27 2023
 [*]
 [dumpfile] "D:\github\PSoC5_DmaTest\Simulation\fifo_TB.vcd"
-[dumpfile_mtime] "Tue Jul 18 04:45:24 2023"
-[dumpfile_size] 5351263
+[dumpfile_mtime] "Wed Jul 19 03:04:44 2023"
+[dumpfile_size] 7071879
 [savefile] "D:\github\PSoC5_DmaTest\Simulation\fifo_TB.gtkw"
-[timestart] 17460
+[timestart] 15330
 [size] 1000 600
-[pos] -127 -32
+[pos] -1 -1
 *-12.900315 35000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] fifo_TB.
 [treeopen] fifo_TB.fifo_1.
@@ -24,13 +24,13 @@ fifo_TB.bus_clk
 @22
 fifo_TB.f0In[7:0]
 @28
-fifo_TB.drqF0In
-fifo_TB.drqF0Out
 fifo_TB.fifo_1.fifo.U0.FIFO0.fifo_wr_enable
 fifo_TB.fifo_1.fifo.U0.FIFO0.fifo_rd_enable
-fifo_TB.fifo_1.fifo.U0.FIFO0.bus_not__full
-fifo_TB.fifo_1.fifo.U0.FIFO0.bus_not_empty
 fifo_TB.fifo_1.fifo.U0.d0_load
+fifo_TB.fifo_1.f0Empty
+@29
+fifo_TB.fifo_1.f0NotFull
+@28
 fifo_TB.fifo_1.fifo.U0.FIFO0.rd_pointer[1:0]
 fifo_TB.fifo_1.fifo.U0.FIFO0.wr_pointer[1:0]
 @22

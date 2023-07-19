@@ -14,10 +14,10 @@ module fifo_TB;
 	reg cpu_clk;
 
 	// fifo status
-	wire drqF0In;
-	wire drqF0Out;
-	wire drqF1In;
-	wire drqF1Out;
+	wire f0NotFull;
+	wire f0Empty;
+	wire f1NotFull;
+	wire f1Empty;
 
 	// 
 	reg [7:0] f0In;
@@ -25,7 +25,7 @@ module fifo_TB;
 	reg [7:0] f0Out;
 	reg [7:0] f1Out;
 
-	fifo fifo_1 (.clock(bus_clk), .f0In(drqF0In), .f0Out(drqF0Out), .f1In(drqF1In), .f1Out(drqF1Out));
+	fifo fifo_1 (.clock(bus_clk), .f0NotFull(f0NotFull), .f0Empty(f0Empty), .f1NotFull(f1NotFull), .f1Empty(f1Empty));
 
 	initial	/* This loop runs only once */ 
 	begin
@@ -34,8 +34,8 @@ $dumpvars(0,fifo_TB);
 //$dumpvars;
 		bus_clk = 0;
 
-		#20;
-		wait(drqF0In);
+		#10;
+		wait(f0NotFull);
 
 		f0In = 8'hff;
 		fifo_TB.fifo_1.fifo.U0.fifo0_write(f0In);
@@ -49,21 +49,21 @@ $dumpvars(0,fifo_TB);
 		f0In = 8'h11;
 		fifo_TB.fifo_1.fifo.U0.fifo0_write(f0In);
 		#2;
-//		wait(~drqF0Out);
-		// note: when FIFO becomes full fifo0_read hangs as it's looking at incorrect signal
-		// when FIFO is in DYN mode.
+		wait(~f0Empty);
+		// note: when FIFO becomes full fifo0_read hangs as it's interpreting status signal
+		// incorrectly when FIFO is in DYN mode.
 		fifo_TB.fifo_1.fifo.U0.fifo0_read(f0Out);
 		if (f0Out != 8'hff) begin $display("Fifo0 returned bad value %m"); $stop; end
 		#2;
-//		wait(~drqF0Out);
+//		wait(~f0Empty);
 		fifo_TB.fifo_1.fifo.U0.fifo0_read(f0Out);
 		if (f0Out != 8'h88) begin $display("Fifo0 returned bad value %m"); $stop; end
 		#2;
-//		wait(~drqF0Out);
+//		wait(~f0Empty);
 		fifo_TB.fifo_1.fifo.U0.fifo0_read(f0Out);
 		if (f0Out != 8'h44) begin $display("Fifo0 returned bad value %m"); $stop; end
 		#2;
-//		wait(~drqF0Out);
+//		wait(~f0Empty);
 		fifo_TB.fifo_1.fifo.U0.fifo0_read(f0Out);
 		if (f0Out != 8'h11) begin $display("Fifo0 returned bad value %m"); $stop; end
 		#2;
