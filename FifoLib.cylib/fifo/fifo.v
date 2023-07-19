@@ -17,10 +17,10 @@
 
 module fifo (
     input wire clock, 
-    output wire f0In, 
-    output wire f0Out, 
-    output wire f1In, 
-    output wire f1Out
+    output wire f0In,   // f0_not_full
+    output wire f0Out,  // f0_empty
+    output wire f1In,   // f1_not_full
+    output wire f1Out   // f1_empty
 );
 
 /* ==================== Wire and Register Declarations ==================== */
