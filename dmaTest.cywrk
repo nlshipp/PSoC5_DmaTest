@@ -3,18 +3,28 @@
 <!--This file is machine generated and read. It is not intended to be edited by hand.-->
 <!--Due to this, there is no schema for this file.-->
 <CyGuid_2867d519-54d2-4c01-9830-c51cb08bc3dd type_name="CyDesigner.Common.ProjMgmt.Model.CyPrjMgmtWorkspaceSerialize" version="5" xml_contents_version="3" name="dmaTest" persistent="dmaTest.cywrk" platform="NOT_USED">
-<current_project name=".\fifoTest.cydsn\fifoTest.cyprj" />
+<current_project name=".\dmaTest_A.cydsn\dmaTest_A.cyprj" />
 <wrkspc_folders />
 <files />
 <projects>
 <v>.\fifoTest.cydsn\fifoTest.cyprj</v>
 <v>.\FifoLib.cylib\FifoLib.cyprj</v>
+<v>.\dmaTest_A.cydsn\dmaTest_A.cyprj</v>
+<v>.\dmaTest_B.cydsn\dmaTest_B.cyprj</v>
+<v>.\dmaTest_C.cydsn\dmaTest_C.cyprj</v>
+<v>.\dmaTest_D.cydsn\dmaTest_D.cyprj</v>
 </projects>
 <workspace_id v="488a327f-45f9-45d9-ba9d-173d53b787df" />
 <WriteAppVersionLastSavedWith v="4.3.0.1445" />
 <WriteAppMarketingVersionLastSavedWith v="4.3" />
 <CyGuid_dcbd9771-0334-43dc-9cc3-fe99dc3c5316 type_name="CyDesigner.Common.ProjMgmt.Model.CyPrjMgmtWorkspaceSerialize+CyPrjDependencyList" version="4">
-<wrkspc_dependencies />
+<wrkspc_dependencies>
+<wrkspc_dependency project="FifoLib.cylib\FifoLib.cyprj" dependency="${CyRoot}\psoc\content\default\CyAnnotationLibrary\CyAnnotationLibrary.cylib\CyAnnotationLibrary.cyprj" />
+<wrkspc_dependency project="dmaTest_A.cydsn\dmaTest_A.cyprj" dependency="FifoLib.cylib\FifoLib.cyprj" />
+<wrkspc_dependency project="dmaTest_B.cydsn\dmaTest_B.cyprj" dependency="FifoLib.cylib\FifoLib.cyprj" />
+<wrkspc_dependency project="dmaTest_C.cydsn\dmaTest_C.cyprj" dependency="FifoLib.cylib\FifoLib.cyprj" />
+<wrkspc_dependency project="dmaTest_D.cydsn\dmaTest_D.cyprj" dependency="FifoLib.cylib\FifoLib.cyprj" />
+</wrkspc_dependencies>
 </CyGuid_dcbd9771-0334-43dc-9cc3-fe99dc3c5316>
 <CyGuid_63b68103-67f5-4406-8da6-5c8625765b82 type_name="CyDesigner.Common.ProjMgmt.Model.CyPrjMgmtWorkspaceSerialize+CyIgnoredSystemDepsList" version="1">
 <wrkspc_dependencies />
