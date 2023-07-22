@@ -53,7 +53,7 @@ int main(void)
     {
         // wait for FIFO input to become empty, then add value to process
         statusOut = BitReverse_C_1_fifo_status_Status;
-        while ((statusOut & 0x01) == 0) // f0Not
+        while ((statusOut & 0x01) == 0) // f0NotFull
             statusOut = BitReverse_C_1_fifo_status_Status;
         
         BitReverse_C_1_fifo_in = valIn;
