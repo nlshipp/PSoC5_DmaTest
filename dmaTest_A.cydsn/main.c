@@ -35,6 +35,146 @@ uint8 valIn = 0;
 uint8 valOut;
 uint8 statusOut;
 
+uint8 dataIn[1024];
+uint8 dataOut[1024];
+
+uint8 dmaInCh;
+uint8 dmaOutCh;
+uint8 dmaInTD;
+uint8 dmaOutTD;
+
+void kiloSetup(uint16 count)
+{
+    dmaInCh = DMA_1_DmaInitialize(
+                1 /* bytes/burst */, 
+                1 /* rqst/burst */, 
+                HI16((uint32)dataIn), HI16(CYDEV_PERIPH_BASE));
+                                                                        
+    dmaOutCh = DMA_2_DmaInitialize(
+                1 /* bytes/burst */, 
+                1 /* rqst/burst */, 
+                HI16(CYDEV_PERIPH_BASE), HI16((uint32)dataOut));
+    
+    dmaOutTD = CyDmaTdAllocate();
+    dmaInTD = CyDmaTdAllocate();
+    
+    // Must use DISABLE_TD to disable the DMA channel and not just END_CHAIN_TD, as if we use END_CHAIN, it appears the 
+    // chain can be reactivated with a transfer count set to zero which causes it to run forever.
+    CyDmaTdSetConfiguration(
+                dmaInTD,
+                count /* transfer count */,
+                CY_DMA_DISABLE_TD, // next TD
+                CY_DMA_TD_INC_SRC_ADR);
+    CyDmaTdSetAddress(
+                dmaInTD,
+                LO16((uint32)dataIn),
+                LO16((uint32)&BitReverse_A_1_fifo_in));
+    
+    CyDmaTdSetConfiguration(
+                dmaOutTD,
+                count /* transfer count */,
+                CY_DMA_DISABLE_TD, // next TD
+                CY_DMA_TD_INC_DST_ADR);
+    CyDmaTdSetAddress(
+                dmaOutTD,
+                LO16((uint32)&BitReverse_A_1_fifo_out),
+                LO16((uint32)dataOut));
+}
+
+uint8 dmaStatus(uint16 *inLeft, uint16 *outLeft)
+{
+    uint8 inState, outState;
+    uint8 inTd, outTd;
+    uint8 status = 0;
+    
+    CyDmaChStatus(dmaInCh, &inTd, &inState);
+    CyDmaChStatus(dmaOutCh, &outTd, &outState);
+    
+    if (!(inState & STATUS_CHAIN_ACTIVE) && !(outState & STATUS_CHAIN_ACTIVE))
+        status = 1;
+    
+    CyDmaTdGetConfiguration(dmaInTD, inLeft, NULL, NULL);
+    CyDmaTdGetConfiguration(dmaOutTD, outLeft, NULL, NULL);
+    
+    statusOut = BitReverse_A_1_fifo_status_Status;
+    return status;
+}
+    
+void kiloTest(uint16 max)
+{
+    uint16 i = 0;
+    uint16 in, out;
+    uint8 done = 0;     // DMA transfer finished
+    
+    for (i = 0; i < max; i++) {
+        dataIn[i] = (i % 256);
+    }
+    
+    memset(dataOut, 0xFF, 1024);
+
+    CyDmaChSetInitialTd(dmaInCh, dmaInTD);
+    CyDmaChSetInitialTd(dmaOutCh, dmaOutTD);
+    
+    done = dmaStatus(&in, &out);
+
+    i = 0;
+    // preserve TD = 0
+    CyDmaChEnable(dmaOutCh, 0);
+
+    do {
+        if (statusOut & 0x01) {
+            BitReverse_A_1_fifo_in = (i & 0xFF);
+            i++;
+        }
+    } while (!dmaStatus(&in, &out) && (i < 1024));
+    
+    CyDmaChDisable(dmaOutCh);
+    CyDmaChDisable(dmaInCh);
+    
+    for (i = 0; i < max; i++) {
+        if (bit_reversal[dataIn[i]] != dataOut[i]) {
+            CYASSERT(0);
+        }
+    }
+    
+    // test 2
+
+    memset(dataOut, 0xFF, 1024);
+
+    CyDmaChSetInitialTd(dmaInCh, dmaInTD);
+    CyDmaChSetInitialTd(dmaOutCh, dmaOutTD);
+    
+    done = dmaStatus(&in, &out);
+
+    i = 0;
+    // preserve TD = 0
+    CyDmaChEnable(dmaInCh, 0);
+
+    // preload status after enabling DMA channel
+    // NOTE: since there are two fifos (in and out) it can mean there are 8 bytes in flight, so the in count can drop from 0x10 to 0x08.
+    // Also, don't believe the done status just yet, the dmaStatus just returns done if both channels aren't active, DMA may not have started yet
+    // so the done flag could be incorrectly asserted.
+    done = dmaStatus(&in, &out);
+
+    do {
+        if (!(statusOut & 0x08)) {
+            dataOut[i] = BitReverse_A_1_fifo_out;
+            i++;
+        } 
+        done = dmaStatus(&in, &out);
+    } while ((!done || ((statusOut & 0x0A) != 0x0A)) && (i < 1024));  // while dma isn't finished or f0 and f1 aren't empty
+    
+    CyDmaChDisable(dmaOutCh);
+    CyDmaChDisable(dmaInCh);
+    
+    for (i = 0; i < max; i++) {
+        if (bit_reversal[dataIn[i]] != dataOut[i]) {
+            CYASSERT(0);
+        }
+    }
+}    
+    
+
 int main(void)
 {
     CyGlobalIntEnable; /* Enable global interrupts. */
@@ -44,10 +184,14 @@ int main(void)
     BitReverse_A_1_Enable();
     uint8 valIn = 0;
     uint8 valOut;
-    uint8 statusOut;
     
     statusOut = BitReverse_A_1_fifo_status_Status;
     CYASSERT(statusOut == 0x1f);
+    
+    {
+        kiloSetup(0x10);
+        kiloTest(0x10);
+    }
     
     for(;;)
     {

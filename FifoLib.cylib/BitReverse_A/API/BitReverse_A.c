@@ -83,3 +83,9 @@ void `$INSTANCE_NAME`_Enable()
     CyDmaChEnable(`$INSTANCE_NAME`_dma_data, 1);    // preserve TD values
     CyDmaChEnable(`$INSTANCE_NAME`_dma_ctrl, 1);    // preserve TD values
 }
+
+void `$INSTANCE_NAME`_Disable()
+{
+    CyDmaChDisable(`$INSTANCE_NAME`_dma_data);
+    CyDmaChDisable(`$INSTANCE_NAME`_dma_ctrl);
+}

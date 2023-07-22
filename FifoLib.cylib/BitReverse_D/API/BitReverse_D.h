@@ -18,6 +18,7 @@
 // Basic interface
 void `$INSTANCE_NAME`_Init();
 void `$INSTANCE_NAME`_Enable();
+void `$INSTANCE_NAME`_Disable();
 
 #endif
 

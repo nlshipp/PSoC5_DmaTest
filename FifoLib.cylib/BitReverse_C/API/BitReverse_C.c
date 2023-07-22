@@ -122,3 +122,11 @@ void `$INSTANCE_NAME`_Enable()
 
     `$INSTANCE_NAME`_Control_Reg_Control = 1;       // enable ctrl_drq_en
 }
+
+void `$INSTANCE_NAME`_Disable()
+{
+    CyDmaChDisable(`$INSTANCE_NAME`_dma_data);
+    CyDmaChDisable(`$INSTANCE_NAME`_dma_ctrl);
+    
+    `$INSTANCE_NAME`_Control_Reg_Control = 0;
+}
