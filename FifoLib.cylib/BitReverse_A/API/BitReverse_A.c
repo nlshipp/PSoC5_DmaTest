@@ -12,7 +12,7 @@
 
 /* BitReverse_A
 
-   The implementation a dual fifo block where the output of fifo0 is used as the input and the input of fifo0 is 
+   The implementation of a DMA based byte lookup component where fifo0 of a datapath is used as the input and fifo1 is 
    used as the output, this is common to all variants. The table lookup is done using two DMA channels ctrl/data
    which alternate using a set/reset flip flop triggered from the nrq dma outputs.
 */

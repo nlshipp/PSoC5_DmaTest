@@ -12,10 +12,10 @@
 
 /* BitReverse_C
 
-   The implementation a dual fifo block where the output of fifo0 is used as the input and the input of fifo0 is 
-   used as the output, this is common to all variants. The table lookup is done using two DMA channels ctrl/data,
-   each of which have two TDs, one to perform a data copy, and the other to update a control register which
-   disables/enables ctrl_drq_en.
+   The implementation of a DMA based byte lookup component where fifo0 of a datapath is used as the input and fifo1 is 
+   used as the output, this is common to all variants. The table lookup is done using two DMA channels ctrl/data where
+   alternation is done by use of a control register which the DMA channels set and reset as needed. Differing from variant
+   A and B, each DMA channel has two TDs, one to perform a data copy, and the other to update the control register.
 
    This should use the least number of macrocells and P-terms and also have the least complex signal routing.
    This should have the worst performance since each byte requires four TDs to be executed instead of two.
