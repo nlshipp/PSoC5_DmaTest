@@ -43,21 +43,8 @@ uint8 dmaOutCh;
 uint8 dmaInTD;
 uint8 dmaOutTD;
 
-void kiloSetup(uint16 count)
+void kiloResetTD(uint16 count)
 {
-    dmaInCh = DMA_1_DmaInitialize(
-                1 /* bytes/burst */, 
-                1 /* rqst/burst */, 
-                HI16((uint32)dataIn), HI16(CYDEV_PERIPH_BASE));
-                                                                        
-    dmaOutCh = DMA_2_DmaInitialize(
-                1 /* bytes/burst */, 
-                1 /* rqst/burst */, 
-                HI16(CYDEV_PERIPH_BASE), HI16((uint32)dataOut));
-    
-    dmaOutTD = CyDmaTdAllocate();
-    dmaInTD = CyDmaTdAllocate();
-    
     // Must use DISABLE_TD to disable the DMA channel and not just END_CHAIN_TD, as if we use END_CHAIN, it appears the 
     // chain can be reactivated with a transfer count set to zero which causes it to run forever.
     CyDmaTdSetConfiguration(
@@ -79,6 +66,24 @@ void kiloSetup(uint16 count)
                 dmaOutTD,
                 LO16((uint32)&BitReverse_A_1_fifo_out),
                 LO16((uint32)dataOut));
+}
+
+void kiloSetup(uint16 count)
+{
+    dmaInCh = DMA_1_DmaInitialize(
+                1 /* bytes/burst */, 
+                1 /* rqst/burst */, 
+                HI16((uint32)dataIn), HI16(CYDEV_PERIPH_BASE));
+                                                                        
+    dmaOutCh = DMA_2_DmaInitialize(
+                1 /* bytes/burst */, 
+                1 /* rqst/burst */, 
+                HI16(CYDEV_PERIPH_BASE), HI16((uint32)dataOut));
+    
+    dmaOutTD = CyDmaTdAllocate();
+    dmaInTD = CyDmaTdAllocate();
+
+    kiloResetTD(count);
 }
 
 uint8 dmaStatus(uint16 *inLeft, uint16 *outLeft)
@@ -110,6 +115,8 @@ void kiloTest(uint16 max)
         dataIn[i] = (i % 256);
     }
     
+    // test 1 - DMA on output channel only
+    
     memset(dataOut, 0xFF, 1024);
 
     CyDmaChSetInitialTd(dmaInCh, dmaInTD);
@@ -137,9 +144,10 @@ void kiloTest(uint16 max)
         }
     }
     
-    // test 2
+    // test 2 - DMA on input channel only
 
     memset(dataOut, 0xFF, 1024);
+    
 
     CyDmaChSetInitialTd(dmaInCh, dmaInTD);
     CyDmaChSetInitialTd(dmaOutCh, dmaOutTD);
@@ -167,6 +175,47 @@ void kiloTest(uint16 max)
     CyDmaChDisable(dmaOutCh);
     CyDmaChDisable(dmaInCh);
     
+    for (i = 0; i < max; i++) {
+        if (bit_reversal[dataIn[i]] != dataOut[i]) {
+            CYASSERT(0);
+        }
+    }
+    
+    CYASSERT(statusOut == 0x1F);
+    
+    // test 3 - DMA on input and output 
+
+    memset(dataOut, 0xFF, 1024);
+    
+    CyDmaChSetInitialTd(dmaInCh, dmaInTD);
+    CyDmaChSetInitialTd(dmaOutCh, dmaOutTD);
+    
+    kiloResetTD(max);
+    
+    done = dmaStatus(&in, &out);
+    
+    // if fifo1 is empty, but output channel drq is set, reset the sticky drq from the previous
+    // manual queue operations.
+    if (CY_DMA_CH_STRUCT_PTR[dmaOutCh].basic_status[0] & 0x04)
+        CY_DMA_CH_STRUCT_PTR[dmaOutCh].basic_status[0] = 0x04;
+
+    i = 0;
+    // preserve TD = 0
+    CyDmaChEnable(dmaOutCh, 0);
+    CyDmaChEnable(dmaInCh, 0);
+
+    do {
+        i++;
+        done = dmaStatus(&in, &out);
+    } while (!done && (i < 1024));  
+    
+    CyDmaChDisable(dmaOutCh);
+    CyDmaChDisable(dmaInCh);
+    
+    CYASSERT(done);     // did we time-out?
+    
+    CYASSERT((statusOut & 0x0A) == 0x0A); // both FIFO's should be asserting empty.
+
     for (i = 0; i < max; i++) {
         if (bit_reversal[dataIn[i]] != dataOut[i]) {
             CYASSERT(0);
