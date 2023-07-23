@@ -174,7 +174,7 @@ void dmaTest(uint16 max)
         }
     }
     
-    CYASSERT(fifoStatusOut == 0x1F);
+    CYASSERT((fifoStatusOut & 0x0F) == 0x0F);
     
     // test 3 - DMA on input and output 
 

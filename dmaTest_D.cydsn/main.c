@@ -36,10 +36,18 @@ uint8 valIn = 0;
 uint8 valOut;
 uint8 statusOut;
 
+uint16 dmaTestCount = 0x10;
+
 int main(void)
 {
     CyGlobalIntEnable; /* Enable global interrupts. */
 
+    dmaTestLibInit(
+        &BitReverse_D_1_fifo_in,
+        &BitReverse_D_1_fifo_out,
+        &BitReverse_D_1_fifo_status_Status,
+        bit_reversal);
+    
     uint8 valIn = 0;
     uint8 valOut;
     uint8 statusOut;
@@ -51,6 +59,11 @@ int main(void)
     BitReverse_D_1_Init();
     BitReverse_D_1_Enable();
     
+    {
+        dmaSetup(dmaTestCount);
+        dmaTest(dmaTestCount);
+    }
+
     statusOut = BitReverse_D_1_fifo_status_Status;
     CYASSERT(statusOut == 0x0f);
     

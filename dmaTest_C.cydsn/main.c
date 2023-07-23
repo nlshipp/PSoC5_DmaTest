@@ -35,16 +35,30 @@ uint8 valIn = 0;
 uint8 valOut;
 uint8 statusOut;
 
+uint16 dmaTestCount = 0x10;
+
 int main(void)
 {
     CyGlobalIntEnable; /* Enable global interrupts. */
 
-    /* Enable byte lookup table component using bit reversal table */
-    BitReverse_C_1_Init(bit_reversal);
-    BitReverse_C_1_Enable();
+    dmaTestLibInit(
+        &BitReverse_C_1_fifo_in,
+        &BitReverse_C_1_fifo_out,
+        &BitReverse_C_1_fifo_status_Status,
+        bit_reversal);
+        
     uint8 valIn = 0;
     uint8 valOut;
     uint8 statusOut;
+
+    /* Enable byte lookup table component using bit reversal table */
+    BitReverse_C_1_Init(bit_reversal);
+    BitReverse_C_1_Enable();
+    
+    {
+        dmaSetup(dmaTestCount);
+        dmaTest(dmaTestCount);
+    }
     
     statusOut = BitReverse_C_1_fifo_status_Status;
     CYASSERT(statusOut == 0x1f);
