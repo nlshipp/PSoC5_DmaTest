@@ -33,7 +33,8 @@ the flipflop to toggle twice.
 
 ### BitReverse_B2
 This is similar to BitReverse_B, but instead of connecting the OR of the DMA NRQ outputs to the flipflop 
-toggle input, instead it's connected to the clock of the flipflop and the toggle input is tied to 1.
+toggle input, instead it's connected to the clock of the flipflop and the toggle input is tied to 1. This 
+solves the double clocking issue of variant B but at a slightly higher resource (macrocell and P-term) cost.
 
 ### BitReverse_C
 This version uses a data output register written by the DMA channel to enable/disable the DRQ input of
