@@ -32,6 +32,7 @@ int main(void)
     for(;;)
     {
         uint8 val;
+        uint16 val16;
         uint8 values[4] = {0x12, 0x34, 0x56, 0x78};
         
         DP("Reading FIFO status - empty\n");
@@ -52,7 +53,26 @@ int main(void)
 
         status = Status_Reg_1_Read();
         DP("Status = %02x, value = %02x\n", status, val);
+
+        val16 = 0x55AA;
+        DP("Writing 16 bit value %04x to FIFO0/1\n", val16);
+        *(reg16 *)fifo_1_fifo_u0__F0_F1_REG = val16;
+
+        status = Status_Reg_1_Read();
+        DP("Status = %02x\n", status);
+
+        DP("Reading single value from FIFO0\n");
+        val = fifo_1_fifo_F0_REG;
         
+        status = Status_Reg_1_Read();
+        DP("Status = %02x, value = %02x\n", status, val);
+
+        DP("Reading single value from FIFO1\n");
+        val = fifo_1_fifo_F1_REG;
+        
+        status = Status_Reg_1_Read();
+        DP("Status = %02x, value = %02x\n", status, val);
+
         DP("Filling fifo with %02x %02x %02x %02x\n", values[0], values[1], values[2], values[3]);
         for (int i = 0; i < 4; ++i) 
         {
