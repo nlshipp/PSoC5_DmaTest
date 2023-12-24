@@ -64,28 +64,30 @@ void `$INSTANCE_NAME`_Init(const uint8 byteTable[256])
     `$INSTANCE_NAME`_dma_ctrl_TD[1] = CyDmaTdAllocate();
     `$INSTANCE_NAME`_dma_ctrl_TD[0] = CyDmaTdAllocate();
     
-    // First ctrl TD loads the source byte from fifo0 into the lower order byte of the source address offset of data TD,
+    // First TD clears the control register to disable ctrl_drq using the value of datapath register D0(0),
     // then autoexecutes next TD.
+    // Note: Must disable DRQ input first otherwise a double transition on the DRQ input can cause the ctrl 
+    // TD chain to execute twice before the data TD chain can execute.
     CyDmaTdSetConfiguration(
                 `$INSTANCE_NAME`_dma_ctrl_TD[0],
                 1 /* transfer count */,
                 `$INSTANCE_NAME`_dma_ctrl_TD[1], /* next TD */
-                CY_DMA_TD_AUTO_EXEC_NEXT);
+                CY_DMA_TD_AUTO_EXEC_NEXT);                
     CyDmaTdSetAddress(
                 `$INSTANCE_NAME`_dma_ctrl_TD[0],
-                LO16((uint32)`$INSTANCE_NAME`_fifo_in_out_fifo_F0_PTR),
-                LO16((uint32)&DMAC_TDMEM[`$INSTANCE_NAME`_dma_data_TD[0]].TD1[0]));
-    // Second TD clears the control register to disable ctrl_drq using the value of datapath register D0(0).
+                LO16((uint32)`$INSTANCE_NAME`_fifo_in_out_fifo_D0_PTR),
+                LO16((uint32)`$INSTANCE_NAME`_Control_Reg_Control_PTR));
+    // Second ctrl TD loads the source byte from fifo0 into the lower order byte of the source address offset of data TD,
     CyDmaTdSetConfiguration(
                 `$INSTANCE_NAME`_dma_ctrl_TD[1],
                 1 /* transfer count */,
-                `$INSTANCE_NAME`_dma_ctrl_TD[0], /* next TD - loop back*/
+                `$INSTANCE_NAME`_dma_ctrl_TD[0], /* next TD - loop back */
                 `$INSTANCE_NAME`_DMA_Ctrl__TD_TERMOUT_EN);  // enable NRQ output to run data TDs
     CyDmaTdSetAddress(
                 `$INSTANCE_NAME`_dma_ctrl_TD[1],
-                LO16((uint32)`$INSTANCE_NAME`_fifo_in_out_fifo_D0_PTR),
-                LO16((uint32)`$INSTANCE_NAME`_Control_Reg_Control_PTR));
-                
+                LO16((uint32)`$INSTANCE_NAME`_fifo_in_out_fifo_F0_PTR),
+                LO16((uint32)&DMAC_TDMEM[`$INSTANCE_NAME`_dma_data_TD[0]].TD1[0]));
+    
     // The data TD loads a byte from the passed byteTable indexed by the inpute byte above,
     // copies it to fifo1, then autoexecutes next TD
     CyDmaTdSetConfiguration(
